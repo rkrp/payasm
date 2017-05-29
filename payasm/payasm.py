@@ -4,21 +4,20 @@ import opcode
 from types import CodeType
 import struct
 import marshal
+import ast
 
-class Instruction:
+class Instruction:    
     def __init__(self, inst):
         self.raw = inst
         inst = inst.split()
         self.opcode = inst[0]
         self.opbyte = opcode.opmap[self.opcode]
-
         #Check if the instruction has arguments
         self.has_arg = self.opbyte >= 0x5a
-
         if self.has_arg:
             self.arg = int(inst[1])
             try:
-                self.arg_val = inst[2]
+                self.arg_val = ast.literal_eval(' '.join(inst[2:]))
             except KeyError:
                 pass
 
@@ -29,7 +28,10 @@ class Instruction:
 WHITESPACE_LEN = 16
 
 def get_constants(inst):
+    if inst.opcode != "LOAD_CONST":
+        raise Exception("Cannot load constant value for " + inst.opcode)
     return (inst.arg, inst.arg_val)
+
 
 def populate_args(inst):
     if inst.has_arg:
@@ -37,11 +39,9 @@ def populate_args(inst):
     else:
         return ''
 
-
 def assemble(disasm, target_name):
     code = ''
-    insts = [inst[WHITESPACE_LEN:] for inst in disasm.split("\n")]
-
+    insts = [inst[WHITESPACE_LEN:] for inst in disasm.split('\n')]
     constants = {}
     for inst in insts:
         if inst.strip() == '':
@@ -52,11 +52,13 @@ def assemble(disasm, target_name):
         code += chr(inst.opbyte)
         code += populate_args(inst)
 
-        #Add possible constants
+        #Loading constants
         if inst.opcode == 'LOAD_CONST':
-            index, value = get_constants(inst)
+            (index, value) = get_constants(inst)
             constants[index] = value
+            continue
 
+    #populating constants tuple from the dict
     n_constants = max(constants)
     const_list = []
     try:
@@ -65,41 +67,49 @@ def assemble(disasm, target_name):
             const_list.append(constants[i])
             i += 1
     except KeyError:
-            pass
-    print const_list
-    print len(code)
-    """
-    code_type = CodeType(
-        0,          #argcount
-        0,          #kwargcount
-        nlocals,
-        100,        #hardcoded as 100
-        flags,
-        code,       #bytecode
-        const_list, #list of constants
-        names,
-        varnames,
-        filename,
-        name,
-        firstlineno,
-        lnotab,
-        freevars,
-        cellvars,
-    )
-    """
+        pass
+    const_list = tuple(const_list)
 
-    #write_pyc(code_type, target_name + ".pyc")
+    filename = target_name + '.py'
+    flags = 65
+    freevars = ()
+    cellvars = ()
+    firstlineno = 1
+    lnotab = ''
+    name = 'dummy'
+    nlocals = 0
+    names = ()
+    varnames = ()
+    code_type = CodeType(
+            0, 
+            nlocals, 
+            100, 
+            flags, 
+            code, 
+            const_list, 
+            names, 
+            varnames, 
+            filename, 
+            name, 
+            firstlineno, 
+            lnotab
+    )
+    write_pyc(code_type, target_name + '.pyc')
+
 
 def write_pyc(code, location):
     py_magic = '\x03\xf3\x0d\x0a'
     mod_time = '\xe9\xf5\x29\x59'
-    pyc = py_magic + mod_time + code
+    code_str = marshal.dumps(code)
+    pyc = py_magic + mod_time + code_str
     with open(location, 'w') as f:
         f.write(pyc)
 
+
 def main():
-    with open("../tests/disasm", "r") as fp:
+    with open('../tests/disasm', 'r') as fp:
         disasm = fp.read()
-        assemble(disasm, "test")
+        assemble(disasm, 'test')
+
 if __name__ == '__main__':
     main()

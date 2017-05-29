@@ -1,4 +1,4 @@
-  1           0 LOAD_CONST               0 ('HEllo')
+  1           0 LOAD_CONST               0 ('Hello World!')
               3 PRINT_ITEM          
               4 PRINT_NEWLINE       
               5 LOAD_CONST               1 (None)
