@@ -1,0 +1,10 @@
+def addition(a, b):
+    result = a + b
+    return result
+
+def subtract(num1, num2):
+    result = num1 - num2
+    return result
+
+addition(1,2)
+subtract(3, -4)

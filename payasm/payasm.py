@@ -6,7 +6,7 @@ import struct
 import marshal
 import ast
 
-class Instruction:    
+class Instruction:
     def __init__(self, inst):
         self.raw = inst
         inst = inst.split()
@@ -59,7 +59,6 @@ def assemble(disasm, target_name):
             continue
 
     #populating constants tuple from the dict
-    n_constants = max(constants)
     const_list = []
     try:
         i = 0
@@ -72,8 +71,6 @@ def assemble(disasm, target_name):
 
     filename = target_name + '.py'
     flags = 65
-    freevars = ()
-    cellvars = ()
     firstlineno = 1
     lnotab = ''
     name = 'dummy'
@@ -81,17 +78,17 @@ def assemble(disasm, target_name):
     names = ()
     varnames = ()
     code_type = CodeType(
-            0, 
-            nlocals, 
-            100, 
-            flags, 
-            code, 
-            const_list, 
-            names, 
-            varnames, 
-            filename, 
-            name, 
-            firstlineno, 
+            0,
+            nlocals,
+            100,
+            flags,
+            code,
+            const_list,
+            names,
+            varnames,
+            filename,
+            name,
+            firstlineno,
             lnotab
     )
     write_pyc(code_type, target_name + '.pyc')
@@ -104,12 +101,3 @@ def write_pyc(code, location):
     pyc = py_magic + mod_time + code_str
     with open(location, 'w') as f:
         f.write(pyc)
-
-
-def main():
-    with open('../tests/disasm', 'r') as fp:
-        disasm = fp.read()
-        assemble(disasm, 'test')
-
-if __name__ == '__main__':
-    main()
