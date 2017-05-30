@@ -1,0 +1,12 @@
+def simple_armstrong_gen(start, end):
+    retval = []
+    for i in range(start, end + 1):
+        res = 0
+        num = i
+        while num > 0:
+            num, dig = divmod(num, 10)
+            res += dig ** 3
+        if res == i:
+            retval.append(i)
+    return retval
+

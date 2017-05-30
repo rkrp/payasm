@@ -1,0 +1,60 @@
+Disassembly of simple_armstrong_gen:
+  2           0 BUILD_LIST               0
+              3 STORE_FAST               2 (retval)
+
+  3           6 SETUP_LOOP             121 (to 130)
+              9 LOAD_GLOBAL              0 (range)
+             12 LOAD_FAST                0 (start)
+             15 LOAD_FAST                1 (end)
+             18 LOAD_CONST               1 (1)
+             21 BINARY_ADD          
+             22 CALL_FUNCTION            2
+             25 GET_ITER            
+        >>   26 FOR_ITER               100 (to 129)
+             29 STORE_FAST               3 (i)
+
+  4          32 LOAD_CONST               2 (0)
+             35 STORE_FAST               4 (res)
+
+  5          38 LOAD_FAST                3 (i)
+             41 STORE_FAST               5 (num)
+
+  6          44 SETUP_LOOP              51 (to 98)
+        >>   47 LOAD_FAST                5 (num)
+             50 LOAD_CONST               2 (0)
+             53 COMPARE_OP               4 (>)
+             56 POP_JUMP_IF_FALSE       97
+
+  7          59 LOAD_GLOBAL              1 (divmod)
+             62 LOAD_FAST                5 (num)
+             65 LOAD_CONST               3 (10)
+             68 CALL_FUNCTION            2
+             71 UNPACK_SEQUENCE          2
+             74 STORE_FAST               5 (num)
+             77 STORE_FAST               6 (dig)
+
+  8          80 LOAD_FAST                4 (res)
+             83 LOAD_FAST                6 (dig)
+             86 LOAD_CONST               4 (3)
+             89 BINARY_POWER        
+             90 INPLACE_ADD         
+             91 STORE_FAST               4 (res)
+             94 JUMP_ABSOLUTE           47
+        >>   97 POP_BLOCK           
+
+  9     >>   98 LOAD_FAST                4 (res)
+            101 LOAD_FAST                3 (i)
+            104 COMPARE_OP               2 (==)
+            107 POP_JUMP_IF_FALSE       26
+
+ 10         110 LOAD_FAST                2 (retval)
+            113 LOAD_ATTR                2 (append)
+            116 LOAD_FAST                3 (i)
+            119 CALL_FUNCTION            1
+            122 POP_TOP             
+            123 JUMP_ABSOLUTE           26
+            126 JUMP_ABSOLUTE           26
+        >>  129 POP_BLOCK           
+
+ 11     >>  130 LOAD_FAST                2 (retval)
+            133 RETURN_VALUE        
