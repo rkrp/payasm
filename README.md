@@ -3,7 +3,8 @@ payasm
 
 A sweet little python assembler which assembles back output from `dis` to python bytecode.
 
-##What it can do?
+What it can do?
+-------------------
 
 payASM can assemble your disassembled python code into CPython's bytecode implementation. So,
 you can write the assembled bytecode as a `pyc` file and execute it with a Python interpreter.
@@ -13,12 +14,16 @@ generator program. More test cases with complex disassemblies are welcome.
 
 This project is a work-in-progress. So, there is a huge  number of limitations.
 
-##Limitations
+Limitations
+--------------
 
  - Currently works only with Python 2. (Although extending it to Python3 is trivial)
  - No support for lambdas
  - No ************`*args` and `**kwargs` support
 
-##Contributions
+Contributions
+----------------
 
 Contributions are welcome :smile:
+
+Will add the next features to be implemented in issues soon. 
