@@ -21,7 +21,7 @@ Limitations
 
  - Currently works only with Python 2. (Although extending it to Python3 is trivial)
  - No support for lambdas
- - No ************`*args` and `**kwargs` support
+ - No `*args` and `**kwargs` support
 
 Contributions
 ----------------
