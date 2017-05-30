@@ -9,7 +9,6 @@ import re
 
 class Instruction:
     def __init__(self, inst, function):
-        print inst
         self.function = function
         self.raw = inst
         inst = inst.split()
@@ -45,6 +44,12 @@ def get_constants(inst):
         raise Exception("Cannot load constant value for " + inst.opcode)
     return (inst.arg, inst.arg_val)
 
+def get_identifier(inst):
+    allowed = ['GLOBAL', 'FAST', 'ATTR']
+    if filter(lambda x : x in inst.opcode, allowed) != 0:
+        return (inst.arg, inst.arg_val)
+    else:
+        raise Exception("Cannot load name value for " + inst.opcode)
 
 def populate_args(inst):
     if inst.has_arg:
@@ -76,6 +81,9 @@ def parse_instructions(disasm):
 
 def assemble(instructions, target_name):
     constants = {}
+    identifiers = {}
+    global_names = {}
+
     code = ''
     for inst in instructions:
         #Generating bytecode
@@ -87,26 +95,23 @@ def assemble(instructions, target_name):
             (index, value) = get_constants(inst)
             constants[index] = value
             continue
+        elif inst.opcode == 'STORE_FAST' or inst.opcode == 'LOAD_FAST':
+            index, value = get_identifier(inst)
+            identifiers[index] = value
+        elif inst.opcode == 'LOAD_GLOBAL' or inst.opcode == 'LOAD_ATTR':
+            index, value = get_identifier(inst)
+            global_names[index] = value
 
-    #populating constants from the dict to list
-    const_list = []
-    try:
-        i = 0
-        while True:
-            const_list.append(constants[i])
-            i += 1
-    except KeyError:
-        pass
-    const_list = tuple(const_list)
-
+    const_list = dict_to_tuple(constants)
     filename = target_name + '.py'
     flags = 65
     firstlineno = 1
     lnotab = ''
     name = 'dummy'
     nlocals = 0
-    names = ()
-    varnames = ()
+    varnames = dict_to_tuple(identifiers)
+    names = dict_to_tuple(global_names)
+
     code_type = CodeType(
             0,
             nlocals,
@@ -122,6 +127,25 @@ def assemble(instructions, target_name):
             lnotab
     )
     return code_type
+
+def dict_to_tuple(numdict):
+    """populates constants from the dict with contigous
+    integer keys from 0, to a tuple"""
+
+    temp_list = []
+    try:
+        i = min(numdict)
+        if i != 0:
+            temp_list += [0] * i
+        while True:
+            temp_list.append(numdict[i])
+            i += 1
+    except KeyError:
+        pass
+    except ValueError:
+        pass
+
+    return tuple(temp_list)
 
 def write_pyc(code, location):
     py_magic = '\x03\xf3\x0d\x0a'

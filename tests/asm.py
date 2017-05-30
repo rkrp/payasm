@@ -1,6 +1,7 @@
 import unittest
 from subprocess import check_output
 from payasm import payasm
+from dis import dis
 
 class PayasmTest(unittest.TestCase):
     """Tests for payasm assembler"""
@@ -21,5 +22,6 @@ class PayasmTest(unittest.TestCase):
         with open(filename, 'r') as fp:
             disasm = fp.read()
         instructions = payasm.parse_instructions(disasm)
-        payasm.assemble(instructions, "tests/simple_armstrong")
+        code = payasm.assemble(instructions, "tests/simple_armstrong")
+        dis(code)
 
