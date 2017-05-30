@@ -1,6 +1,8 @@
 payasm
 ======
 
+[![Travis](https://img.shields.io/travis/rkrp/payasm.svg)]()
+
 A sweet little python assembler which assembles back output from `dis` to python bytecode.
 
 What it can do?
