@@ -8,7 +8,8 @@ import ast
 import re
 
 class Instruction:
-    def __init__(self, inst, function):
+    def __init__(self, line_no, inst, function):
+        self.line_no = line_no
         self.function = function
         self.raw = inst
         inst = inst.split()
@@ -34,7 +35,7 @@ class Instruction:
                 pass
 
     def __repr__(self):
-        return self.raw
+        return str((self.line_no, ' '.join(self.raw.split())))
 
 
 WHITESPACE_LEN = 16
@@ -61,6 +62,7 @@ def parse_instructions(disasm):
     insts = disasm.split('\n')
     fn_name = None
     instructions = []
+    current_line = None
     for inst in insts:
         if inst.strip() == '':
             continue
@@ -72,10 +74,13 @@ def parse_instructions(disasm):
             continue
 
         #Sanitize the whitespace and line number markers
-        #TODO line number support for better stacktrace and decompilation
+        parts = inst[:WHITESPACE_LEN - 1].split()
+        if len(parts) != 1 and parts[0].isdigit():
+            current_line = int(parts[0])
+
         inst = inst[WHITESPACE_LEN:]
 
-        instructions.append(Instruction(inst, fn_name))
+        instructions.append(Instruction(current_line, inst, fn_name))
     return instructions
 
 
@@ -84,11 +89,26 @@ def assemble(instructions, target_name):
     identifiers = {}
     global_names = {}
 
+    lnotab = ''
+    firstlineno = None
+    lastline = None
     code = ''
+    bytes_offset = 0
     for inst in instructions:
         #Generating bytecode
-        code += chr(inst.opbyte)
-        code += populate_args(inst)
+        current_instruction = chr(inst.opbyte) + populate_args(inst)
+        code += current_instruction
+
+        if firstlineno == None:
+            firstlineno = inst.line_no
+            lastline = inst.line_no
+
+        if lastline != inst.line_no:
+            print bytes_offset, inst.line_no, lastline
+            lnotab += chr(bytes_offset) + chr(inst.line_no - lastline)
+            bytes_offset = 0
+            lastline = inst.line_no
+        bytes_offset += len(current_instruction)
 
         #Loading constants
         if inst.opcode == 'LOAD_CONST':
@@ -105,8 +125,6 @@ def assemble(instructions, target_name):
     const_list = dict_to_tuple(constants)
     filename = target_name + '.py'
     flags = 65
-    firstlineno = 1
-    lnotab = ''
     name = 'dummy'
     nlocals = 0
     varnames = dict_to_tuple(identifiers)
